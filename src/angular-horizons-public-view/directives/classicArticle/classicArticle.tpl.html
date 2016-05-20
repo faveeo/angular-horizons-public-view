@@ -1,0 +1,64 @@
+<div class="article" ng-mouseover="isHover = true" ng-mouseleave="showShareButtons = false; isHover = false">
+    <div ng-show="hasArticle()">
+        <h6 class="mg-md clearfix" ng-dblclick="showHighlight=!showHighlight" ng-show="entry.pubdate">
+            <span class="float-left">{{timeSinceTranslated}}</span>
+        </h6>
+
+        <div class="boxmask" ng-if="showimages">
+            <a href="{{entry.url}}" target="_blank">
+                <img ng-src="{{entry.imageurl}}"
+                     class="img-responsive" article-image>
+            </a>
+        </div>
+        <div>
+            <h5 class="mg-md">
+                <a href="{{entry.url}}" target="_blank"
+                   >
+                    {{entry.title | default:'Click here to view article'}}
+                </a>
+            </h5>
+
+            <p class="summary">
+                <a href="{{entry.url}}" target="_blank"
+                   ng-bind-html="entry.automaticsummary | cut:true:535:' ...' | nl2br">
+                </a>
+            </p>
+            <dl class="highlights" ng-repeat="hlt in highlights" ng-if="showHighlight">
+                <dt>In {{hlt.field}}:</dt>
+                <dd ng-repeat="fragment in hlt.fragments" ng-bind-html="fragment|to_trusted_html"></dd>
+            </dl>
+            <h6 class="mg-md" ng-if="entry.urlFQDN">
+                <a href="{{entry.url}}" target="_blank">
+                    {{entry.urlFQDN | cleanHostName}}
+                </a>
+            </h6>
+        </div>
+    </diV>
+    <span class="twitter-img" ng-repeat="tr in trefs">
+        <a href="{{tr.tweetURL}}" target="_blank">
+            <img class="img-thumbnail twitteruser-img" ng-src="{{tr.authorImageURL}}"
+                 alt="{{tr.authorName}}" fallback-twitter-src-img="{{tr.authorName}}"/>
+        </a>
+    </span>
+    <hr>
+    <div class="share-container text-center" ng-show="hasArticle()">
+        <div class="action-buttons text-center">
+            <a href="" ng-click="showShareButtons = true" ng-show="isHover">
+                <i class="fa fa-share-alt"></i> Share Article
+            </a>
+        </div>
+        <!-- AddThis Button BEGIN -->
+        <div data-addthis-toolbox data-url="{{entry.url}}" data-title="{{entry.title}}"
+             data-description="{{entry.automaticsummary}}"
+             class="addthis_toolbox addthis_default_style {{addThisClass}}" ng-show="showShareButtons">
+            <a class="addthis_button_twitter"><img ng-src="{{assetspath+'/shareIcons/twitter.png'}}"></a>
+            <a class="addthis_button_facebook"><img ng-src="{{assetspath+'/shareIcons/facebook.png'}}"></a>
+            <a class="addthis_button_linkedin"><img ng-src="{{assetspath+'/shareIcons/linkedin.png'}}"></a>
+            <a class="addthis_button_google_plusone_share"><img ng-src="{{assetspath+'/shareIcons/googleplus.png'}}"></a>
+            <a class="addthis_button_evernote"><img ng-src="{{assetspath+'/shareIcons/evernote.png'}}"></a>
+            <a class="addthis_button_mailto"><img ng-src="{{assetspath+'/shareIcons/mail.png'}}"></a>
+            <a class="addthis_button_pocket"><img ng-src="{{assetspath+'/shareIcons/pocket.png'}}"></a>
+            <a class="addthis_button_buffer"><img ng-src="{{assetspath+'/shareIcons/buffer.png'}}"></a>
+        </div>
+    </div>
+</div>

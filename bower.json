@@ -1,0 +1,30 @@
+{
+  "name": "angular-horizons-public-view",
+  "description": "Angular modules to display Horizons public content",
+  "version": "0.0.1",
+  "main": [
+    "dist/angular-horizons-public-view.js",
+    "dist/angular-horizons-public-view.css"
+  ],
+  "authors": {
+    "name": "Faveeo"
+  },
+  "license": "MIT",
+  "keywords": [
+    "Angular",
+    "Horizons"
+  ],
+  "homepage": "https://github.com/faveeo/angular-horizons-public-view",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "src",
+    "test",
+    "gulpfile.js",
+    "node_modules",
+    "bower-components"
+  ],
+  "dependencies": {
+    "restangular": "^1.5.2"
+  }
+}
