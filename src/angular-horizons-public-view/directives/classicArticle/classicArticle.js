@@ -9,9 +9,9 @@ angular.module('angularHorizonsPublicView.directives').directive('classicarticle
             onclose: '&'
         },
         data: "",
-        templateUrl: "angularHorizonsPublicView/directives/classicArticle/classicArticle.tpl.html",
+        templateUrl: "angular-horizons-public-view/directives/classicArticle/classicArticle.tpl.html",
         replace: true,
-        controller: ['$scope', '$rootScope', '$translate', '$timeout', 'timeSinceTranslatedFilter', function ($scope, $rootScope, $translate, $timeout, timeSinceTranslated) {
+        controller: ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
             if (angular.isDefined($rootScope.assetsPath)) {
                 //remove trailing slash in the path
                 $scope.assetspath = $rootScope.assetsPath.replace(/\/$/, '');
@@ -19,13 +19,7 @@ angular.module('angularHorizonsPublicView.directives').directive('classicarticle
                 $scope.assetspath = 'assets';
             }
 
-            $scope.timeSinceTranslated = "";
-            $translate.onReady(function() {
-                var value = timeSinceTranslated($scope.entry.pubdate);
-                $scope.timeSinceTranslated = $translate.instant("FILTERS.TIME_SINCE_TRANSLATED." + value.type, {'count': value.count});
-            });
-
-            $scope.addThisClass = "addthis" + new Date().getTime();
+            $scope.addThisClass = "addthis" + new Date().getTime() + Math.random();
             $scope.showShareButtons = false;
             $scope.showShare = false;
 
@@ -35,6 +29,8 @@ angular.module('angularHorizonsPublicView.directives').directive('classicarticle
 
             //update addthis script and parameters for the current article
             function checkaddThisLoaded() {
+                console.log(typeof addthis);
+
                 if (typeof addthis !== 'undefined') {
                     $scope.$evalAsync(function() { $scope.updateAddThis(); } );
                 } else {
@@ -48,7 +44,8 @@ angular.module('angularHorizonsPublicView.directives').directive('classicarticle
                     'description': $scope.entry.automaticsummary
                 });
             };
-            checkaddThisLoaded();
+
+            $timeout(checkaddThisLoaded,200);
         }]
     };
 });

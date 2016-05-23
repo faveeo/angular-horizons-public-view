@@ -3,32 +3,37 @@
             function () {
                 return {
                     restrict: 'EA',
-                    templateUrl: 'widgets/simpleView.tpl.html',
+                    templateUrl: 'angular-horizons-public-view/directives/simpleView/simpleView.tpl.html',
                     scope: {
                         config: '='
                     },
                     replace: false,
-                    controller: ['$scope', '$rootScope', 'FaveeoApi',
-                        function ($scope, $rootScope, FaveeoApi) {
+                    controller: ['$scope', '$rootScope', 'FaveeoApiHorizonsContent',
+                        function ($scope, $rootScope, FaveeoApiHorizonsContent) {
                             $scope.lastArticleLoaded = false;
                             $scope.loading = false;
                             $scope.articles = [];
                             $scope.page = 1;
-                            $scope.dateRange = 7;
-                            $scope.pageSize = 10;
-                            $scope.socialMagazineId = '496eeb1d-f689-4a0b-a693-a7ea80b6816d';
+                            $scope.dateRange = $scope.config.dateRange;
+                            $scope.pageSize = $scope.config.pageSize;
+                            $scope.socialMagazineId = $scope.config.socialMagazineId;
 
-                            $scope.init = function () {
+                            $scope.newPage = function () {
                                 $scope.articles = [];
                                 $scope.page = 1;
                                 $scope.getContent();
                             };
 
+                            $scope.setNewDateRange = function(dateRange) {
+                                $scope.dateRange = dateRange;
+                                $scope.init();
+                            };
+
                             $scope.getContent = function () {
-                                FaveeoApi.abortGetArticleForUrl();
-                                FaveeoApi.abortGetContent();
+                                FaveeoApiHorizonsContent.abortGetArticleForUrl();
+                                FaveeoApiHorizonsContent.abortGetContent();
                                 $scope.loading = true;
-                                FaveeoApi.getContent($scope.socialMagazineId, $scope.dateRange, $scope.page, $scope.pagesize, false,
+                                FaveeoApiHorizonsContent.getContent($scope.socialMagazineId, $scope.dateRange, $scope.page, $scope.pageSize, false,
                                     function (data) {
                                         $scope.lastArticleLoaded = true;
                                         try {
@@ -66,17 +71,11 @@
                                 $scope.getContent();
                             };
 
-                            $scope.init();
+                            $scope.newPage();
                         }]
                 };
             }
         );
 
-    }(angular.module("angularHorizonsPublicView.simpleView", [
-        'angularHorizonsPublicView.directives',
-        'angularHorizonsPublicView.filters',
-        'angularHorizonsPublicView.factories',
-        'angularHorizonsPublicView.faveeoApi',
-        'ngAnimate'
-    ]))
+    }(angular.module("angularHorizonsPublicView.simpleView"))
 );

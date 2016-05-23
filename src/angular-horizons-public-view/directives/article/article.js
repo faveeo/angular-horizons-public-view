@@ -5,14 +5,14 @@ angular.module('angularHorizonsPublicView.directives').directive('article', func
             baseline: '=',
             showimages: '='
         },
-        templateUrl: "horizons-common/directives/article/article.tpl.html",
+        templateUrl: "angular-horizons-public-view/directives/article/article.tpl.html",
         replace: true,
-        controller: ['$scope', 'FaveeoApiTwitterInfluencers',  function ($scope, FaveeoApiTwitterInfluencers) {
+        controller: ['$scope', 'FaveeoApiHorizonsContent',  function ($scope, FaveeoApiHorizonsContent) {
 
             $scope.article = { twitterReferences: $scope.baseline.twitterReferences, highlights: $scope.baseline.highlights};
             var baselineDocument = $scope.baseline.document;
             if (angular.isUndefined(baselineDocument.extractorType) || baselineDocument.extractorType === 'faveeo') {
-                FaveeoApiTwitterInfluencers.getArticleForUrl(baselineDocument.url).then(
+                FaveeoApiHorizonsContent.getArticleForUrl(baselineDocument.url).then(
                     function (doc) {
                         if(angular.isDefined(doc)) {
                             $scope.article.document = enhanceBaselineDocument(doc);

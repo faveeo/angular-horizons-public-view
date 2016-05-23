@@ -1,7 +1,7 @@
 <div class="article" ng-mouseover="isHover = true" ng-mouseleave="showShareButtons = false; isHover = false">
     <div ng-show="hasArticle()">
         <h6 class="mg-md clearfix" ng-dblclick="showHighlight=!showHighlight" ng-show="entry.pubdate">
-            <span class="float-left">{{timeSinceTranslated}}</span>
+            <span class="float-left">{{entry.pubdate | timeSince}} ago</span>
         </h6>
 
         <div class="boxmask" ng-if="showimages">

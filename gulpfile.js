@@ -62,7 +62,7 @@ gulp.task('minify-css', function () {
 
 function prepareTemplates() {
     return gulp.src(path.join(sourceDirectory, '/**/*.html'))
-        .pipe(templateCache('template.js', {module: 'angularHorizonsPublicView.directives'}));
+        .pipe(templateCache('template.js', {module: 'angularHorizonsPublicView'}));
 }
 
 gulp.task('build', function () {

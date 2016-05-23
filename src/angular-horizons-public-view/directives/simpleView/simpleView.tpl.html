@@ -1,38 +1,36 @@
 <div class="simpleview-container" ng-cloak ng-show="socialMagazineId!=''">
-    <div translate-cloak>
-        <section class="article-container">
+    <section class="article-container">
+        <div class="row">
+            <div ng-repeat="article in articles">
+                <div ng-if="$index % 2 == 0" class="clearfix visible-md-block"></div>
+                <div ng-if="$index % 3 == 0" class="clearfix visible-lg-block"></div>
+                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-left">
+                    <article baseline="article" showimages="config.showImages"></article>
+                </div>
+            </div>
+        </div>
+        <div class="row text-center show-more" ng-show="!lastArticleLoaded && !loading">
+            <button class="btn btn-default show-more-button" ng-click="getNextPage()">
+                Show more
+            </button>
+        </div>
+    </section>
+
+    <div class="container">
+        <div ng-show="articles.length == 0 && !loading">
             <div class="row">
-                <div ng-repeat="article in articles">
-                    <div ng-if="$index % 2 == 0" class="clearfix visible-md-block"></div>
-                    <div ng-if="$index % 3 == 0" class="clearfix visible-lg-block"></div>
-                    <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 text-left">
-                        <article baseline="article" showimages="config.showImages"></article>
-                    </div>
-                </div>
-            </div>
-            <div class="row text-center show-more" ng-show="!lastArticleLoaded && !loading">
-                <button class="btn btn-default show-more-button" ng-click="getNextPage()" translate>
-                    FULL_VIEW.SHOW_MORE
-                </button>
-            </div>
-        </section>
-
-        <div class="container">
-            <div ng-show="articles.length == 0 && !loading">
-                <div class="row">
-                    <div class="col-xs-12 text-center ">
-                        <h3 class="text-warning" translate>FULL_VIEW.NO_ARTICLE_FOUND</h3>
-                    </div>
+                <div class="col-xs-12 text-center ">
+                    <h3 class="text-warning">Sorry no articles found for that period of time.</h3>
                 </div>
             </div>
         </div>
-
-        <div class="loading row" ng-show="loading">
-            <div class="col-xs-12 text-center">
-                <i class="fa fa-refresh fa-spin fa-5x"></i>
-            </div>
-        </div>
-
-        <script src="//s7.addthis.com/js/300/addthis_widget.js"></script>
     </div>
+
+    <div class="loading row" ng-show="loading">
+        <div class="col-xs-12 text-center">
+            <i class="fa fa-refresh fa-spin fa-5x"></i>
+        </div>
+    </div>
+
+    <script src="//s7.addthis.com/js/300/addthis_widget.js#pubid="></script>
 </div>

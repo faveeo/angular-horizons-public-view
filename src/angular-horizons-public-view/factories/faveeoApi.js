@@ -1,19 +1,21 @@
 (function (faveeoApi) {
-    
-    faveeoApi.run(function (Restangular, configFileReader) {
 
-        Restangular.setDefaultHeaders({
-            'Content-Type': 'application/json'
-        });
-        Restangular.setBaseUrl(configFileReader.faveeoApiUrl);
-        
+    faveeoApi.factory('FaveeoApiConfig', function (Restangular) {
+		var factory = {};
+		factory.init = function(serverUrl) {
+			Restangular.setDefaultHeaders({
+				'Content-Type': 'application/json'
+			});
+			Restangular.setBaseUrl(serverUrl);
+		};
+		return factory;
     });
-    
-    faveeoApi.factory('FaveeoApiHorizonsContent', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
+
+    faveeoApi.factory('FaveeoApiHorizonsContent', ['$q', 'Restangular', function ($q, Restangular) {
         var factory = {};
         factory.path = "twitterinfluencers2/";
         factory.restangularAPI = Restangular.all(factory.path);
-        
+
         /**
          * Get influencers content
          * @param socialMagazineId
@@ -43,7 +45,7 @@
 
             factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/content", queryParams).then(
                 successCallback,
-                HttpErrorHandler.useDefaultCallbackIfUndefined(errorCallback)
+                errorCallback
             );
         };
 
@@ -72,7 +74,7 @@
             factory.getArticleForUrlDeferred.resolve();
             factory.getArticleForUrlDeferred = $q.defer();
         };
-        
+
         return factory;
     }]);
 

@@ -25,6 +25,7 @@
     "bower-components"
   ],
   "dependencies": {
-    "restangular": "^1.5.2"
+    "restangular": "^1.5.2",
+    "angular-iso8601": "~0.0.1"
   }
 }
