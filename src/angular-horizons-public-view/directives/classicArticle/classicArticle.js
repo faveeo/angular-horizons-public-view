@@ -29,8 +29,6 @@ angular.module('angularHorizonsPublicView.directives').directive('classicarticle
 
             //update addthis script and parameters for the current article
             function checkaddThisLoaded() {
-                console.log(typeof addthis);
-
                 if (typeof addthis !== 'undefined') {
                     $scope.$evalAsync(function() { $scope.updateAddThis(); } );
                 } else {
