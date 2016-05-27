@@ -15,6 +15,8 @@
 		[
 			'restangular'
 		]);
+	angular.module('angularHorizonsPublicView.factories',
+		[]);
 	angular.module("angularHorizonsPublicView.simpleView",
 		[
 		]);
@@ -24,6 +26,7 @@
 			'angularHorizonsPublicView.directives',
 			'angularHorizonsPublicView.filters',
 			'angularHorizonsPublicView.faveeoApi',
+			'angularHorizonsPublicView.factories',
 			'angularHorizonsPublicView.simpleView'
 		]);
 

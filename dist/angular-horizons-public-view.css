@@ -43,6 +43,23 @@
   color: #817b00;
 }
 
+.http-error-warning-container {
+  position: fixed;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
+.http-error-warning-container .http-error-text.well {
+  background-color: #d7675f;
+  color: #ffe8d8;
+}
+.http-error-warning-container button.close {
+  opacity: .6;
+}
+.http-error-warning-container button.close span {
+  color: #ffe8d8;
+}
+
 .simpleview-container .article {
   margin: 10px;
 }
