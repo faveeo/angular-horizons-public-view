@@ -398,13 +398,24 @@
             return number;
         };
     });
-
-
+    
     app.filter('to_trusted_html', ['$sce', function ($sce) {
         return function (text) {
             return $sce.trustAsHtml(text);
         };
     }]);
+
+    app.filter('getYoutubeId', function () {
+        return function(youtubeLink) {
+            if (youtubeLink.match(/(youtube.com)/)) {
+                var getYouTubeVideoID = youtubeLink.split("v=")[1];
+                var cleanVideoID = getYouTubeVideoID.replace(/(&)+(.*)/, ""); // This is YouTube video ID.
+                return cleanVideoID;
+            }
+            return "";
+        };
+    });
+
 }(angular.module("angularHorizonsPublicView.filters")));
 angular.module('angularHorizonsPublicView.directives').directive('article', function () {
     return {
@@ -444,57 +455,6 @@ angular.module('angularHorizonsPublicView.directives').directive('article', func
                 }
                 return baselineDocument;
             }
-        }]
-    };
-});
-
-
-angular.module('angularHorizonsPublicView.directives').directive('classicarticle', function () {
-    return {
-        restrict: 'E',
-        scope: {
-            entry: '=',
-            trefs: '=',
-            highlights: '=',
-            showimages: '=',
-            onclose: '&'
-        },
-        data: "",
-        templateUrl: "angular-horizons-public-view/directives/classicArticle/classicArticle.tpl.html",
-        replace: true,
-        controller: ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
-            if (angular.isDefined($rootScope.assetsPath)) {
-                //remove trailing slash in the path
-                $scope.assetspath = $rootScope.assetsPath.replace(/\/$/, '');
-            } else {
-                $scope.assetspath = 'assets';
-            }
-
-            $scope.addThisClass = "addthis" + new Date().getTime() + Math.random();
-            $scope.showShareButtons = false;
-            $scope.showShare = false;
-
-            $scope.hasArticle = function () {
-                return angular.isDefined($scope.entry);
-            };
-
-            //update addthis script and parameters for the current article
-            function checkaddThisLoaded() {
-                if (typeof addthis !== 'undefined') {
-                    $scope.$evalAsync(function() { $scope.updateAddThis(); } );
-                } else {
-                    $timeout(checkaddThisLoaded,500);
-                }
-            }
-            $scope.updateAddThis = function() {
-                addthis.toolbox('.' + $scope.addThisClass, {}, {
-                    'url': $scope.entry.url,
-                    'title': $scope.entry.title,
-                    'description': $scope.entry.automaticsummary
-                });
-            };
-
-            $timeout(checkaddThisLoaded,200);
         }]
     };
 });
@@ -625,6 +585,57 @@ angular.module('angularHorizonsPublicView.directives').directive('httperrorwarni
 
     }(angular.module("angularHorizonsPublicView.simpleView"))
 );
+
+angular.module('angularHorizonsPublicView.directives').directive('classicarticle', function () {
+    return {
+        restrict: 'E',
+        scope: {
+            entry: '=',
+            trefs: '=',
+            highlights: '=',
+            showimages: '=',
+            onclose: '&'
+        },
+        data: "",
+        templateUrl: "angular-horizons-public-view/directives/classicArticle/classicArticle.tpl.html",
+        replace: true,
+        controller: ['$scope', '$rootScope', '$timeout', function ($scope, $rootScope, $timeout) {
+            if (angular.isDefined($rootScope.assetsPath)) {
+                //remove trailing slash in the path
+                $scope.assetspath = $rootScope.assetsPath.replace(/\/$/, '');
+            } else {
+                $scope.assetspath = 'assets';
+            }
+
+            $scope.addThisClass = "addthis" + new Date().getTime() + Math.random();
+            $scope.showShareButtons = false;
+            $scope.showShare = false;
+
+            $scope.hasArticle = function () {
+                return angular.isDefined($scope.entry);
+            };
+
+            //update addthis script and parameters for the current article
+            function checkaddThisLoaded() {
+                if (typeof addthis !== 'undefined') {
+                    $scope.$evalAsync(function() { $scope.updateAddThis(); } );
+                } else {
+                    $timeout(checkaddThisLoaded,500);
+                }
+            }
+            $scope.updateAddThis = function() {
+                addthis.toolbox('.' + $scope.addThisClass, {}, {
+                    'url': $scope.entry.url,
+                    'title': $scope.entry.title,
+                    'description': $scope.entry.automaticsummary
+                });
+            };
+
+            $timeout(checkaddThisLoaded,200);
+        }]
+    };
+});
+
 
 angular.module("angularHorizonsPublicView").run(["$templateCache", function($templateCache) {$templateCache.put("angular-horizons-public-view/directives/article/article.tpl.html","<div>\n  <classicarticle ng-if=\"article.document\" entry=\"article.document\" showimages=\"showimages\" trefs=\"article.twitterReferences\" highlights=\"article.highlights\" shareassetspath=\"{{assetspath}}\"></classicarticle>\n</div>\n");
 $templateCache.put("angular-horizons-public-view/directives/classicArticle/classicArticle.tpl.html","<div class=\"article\" ng-mouseover=\"isHover = true\" ng-mouseleave=\"showShareButtons = false; isHover = false\">\n    <div ng-show=\"hasArticle()\">\n        <h6 class=\"mg-md clearfix\" ng-dblclick=\"showHighlight=!showHighlight\" ng-show=\"entry.pubdate\">\n            <span class=\"float-left\">{{entry.pubdate | timeSince}} ago</span>\n        </h6>\n\n        <div class=\"boxmask\" ng-if=\"showimages\">\n            <a href=\"{{entry.url}}\" target=\"_blank\">\n                <img ng-src=\"{{entry.imageurl}}\"\n                     class=\"img-responsive\" article-image>\n            </a>\n        </div>\n        <div>\n            <h5 class=\"mg-md\">\n                <a href=\"{{entry.url}}\" target=\"_blank\"\n                   >\n                    {{entry.title | default:\'Click here to view article\'}}\n                </a>\n            </h5>\n\n            <p class=\"summary\">\n                <a href=\"{{entry.url}}\" target=\"_blank\"\n                   ng-bind-html=\"entry.automaticsummary | cut:true:535:\' ...\' | nl2br\">\n                </a>\n            </p>\n            <dl class=\"highlights\" ng-repeat=\"hlt in highlights\" ng-if=\"showHighlight\">\n                <dt>In {{hlt.field}}:</dt>\n                <dd ng-repeat=\"fragment in hlt.fragments\" ng-bind-html=\"fragment|to_trusted_html\"></dd>\n            </dl>\n            <h6 class=\"mg-md\" ng-if=\"entry.urlFQDN\">\n                <a href=\"{{entry.url}}\" target=\"_blank\">\n                    {{entry.urlFQDN | cleanHostName}}\n                </a>\n            </h6>\n        </div>\n    </diV>\n    <span class=\"twitter-img\" ng-repeat=\"tr in trefs\">\n        <a href=\"{{tr.tweetURL}}\" target=\"_blank\">\n            <img class=\"img-thumbnail twitteruser-img\" ng-src=\"{{tr.authorImageURL}}\"\n                 alt=\"{{tr.authorName}}\" fallback-twitter-src-img=\"{{tr.authorName}}\"/>\n        </a>\n    </span>\n    <hr>\n    <div class=\"share-container text-center\" ng-show=\"hasArticle()\">\n        <div class=\"action-buttons text-center\">\n            <a href=\"\" ng-click=\"showShareButtons = true\" ng-show=\"isHover\">\n                <i class=\"fa fa-share-alt\"></i> Share Article\n            </a>\n        </div>\n        <!-- AddThis Button BEGIN -->\n        <div data-addthis-toolbox data-url=\"{{entry.url}}\" data-title=\"{{entry.title}}\"\n             data-description=\"{{entry.automaticsummary}}\"\n             class=\"addthis_toolbox addthis_default_style {{addThisClass}}\" ng-show=\"showShareButtons\">\n            <a class=\"addthis_button_twitter\"><img ng-src=\"{{assetspath+\'/shareIcons/twitter.png\'}}\"></a>\n            <a class=\"addthis_button_facebook\"><img ng-src=\"{{assetspath+\'/shareIcons/facebook.png\'}}\"></a>\n            <a class=\"addthis_button_linkedin\"><img ng-src=\"{{assetspath+\'/shareIcons/linkedin.png\'}}\"></a>\n            <a class=\"addthis_button_google_plusone_share\"><img ng-src=\"{{assetspath+\'/shareIcons/googleplus.png\'}}\"></a>\n            <a class=\"addthis_button_evernote\"><img ng-src=\"{{assetspath+\'/shareIcons/evernote.png\'}}\"></a>\n            <a class=\"addthis_button_mailto\"><img ng-src=\"{{assetspath+\'/shareIcons/mail.png\'}}\"></a>\n            <a class=\"addthis_button_pocket\"><img ng-src=\"{{assetspath+\'/shareIcons/pocket.png\'}}\"></a>\n            <a class=\"addthis_button_buffer\"><img ng-src=\"{{assetspath+\'/shareIcons/buffer.png\'}}\"></a>\n        </div>\n    </div>\n</div>\n");

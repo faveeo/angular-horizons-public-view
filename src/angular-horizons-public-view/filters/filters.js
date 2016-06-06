@@ -132,11 +132,22 @@
             return number;
         };
     });
-
-
+    
     app.filter('to_trusted_html', ['$sce', function ($sce) {
         return function (text) {
             return $sce.trustAsHtml(text);
         };
     }]);
+
+    app.filter('getYoutubeId', function () {
+        return function(youtubeLink) {
+            if (youtubeLink.match(/(youtube.com)/)) {
+                var getYouTubeVideoID = youtubeLink.split("v=")[1];
+                var cleanVideoID = getYouTubeVideoID.replace(/(&)+(.*)/, ""); // This is YouTube video ID.
+                return cleanVideoID;
+            }
+            return "";
+        };
+    });
+
 }(angular.module("angularHorizonsPublicView.filters")));
