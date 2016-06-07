@@ -1,7 +1,7 @@
 (function (faveeoApi) {
 
 
-    faveeoApi.factory('FaveeoApiInfluencers', ['$q', 'Restangular', function ($q, Restangular) {
+    faveeoApi.factory('FaveeoApiInfluencers', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
         var factory = {};
         factory.path = "twitterinfluencers2/";
         factory.restangularAPI = Restangular.all(factory.path);
