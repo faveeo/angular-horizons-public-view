@@ -42,6 +42,242 @@ angular.module('angularHorizonsPublicView.directives').directive('fallbackTwitte
 	};
 });
 
+(function (faveeoApi) {
+
+
+    faveeoApi.factory('FaveeoApiInfluencers', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
+        var factory = {};
+        factory.path = "twitterinfluencers2/";
+        factory.restangularAPI = Restangular.all(factory.path);
+
+        factory.getExamples = function (socialMagazineId, successCallback, errorCallback) {
+            factory.restangularAPI.one(socialMagazineId + "/examples").getList().then(
+                successCallback,
+                HttpErrorHandler.useDefaultCallbackIfUndefined(errorCallback)
+            );
+        };
+
+        factory.getInfluencers = function (socialMagazineId, successCallback, errorCallback) {
+            factory.restangularAPI.one(socialMagazineId + "/influencers").getList().then(
+                successCallback,
+                HttpErrorHandler.useDefaultCallbackIfUndefined(errorCallback)
+            );
+        };
+
+        return factory;
+    }]);
+
+
+}(angular.module("angularHorizonsPublicView.faveeoApi")));
+
+(function (faveeoApi) {
+
+    faveeoApi.factory('FaveeoApiConfig', function (Restangular) {
+		var factory = {};
+		factory.init = function(serverUrl) {
+			Restangular.setDefaultHeaders({
+				'Content-Type': 'application/json'
+			});
+			Restangular.setBaseUrl(serverUrl);
+		};
+		return factory;
+    });
+
+    faveeoApi.factory('FaveeoApiHorizonsContent', ['$q', 'Restangular', function ($q, Restangular) {
+        var factory = {};
+        factory.path = "twitterinfluencers2/";
+        factory.restangularAPI = Restangular.all(factory.path);
+
+        /**
+         * Get influencers content
+         * @param socialMagazineId
+         * @param dateRange
+         * @param page
+         * @param pageSize
+         * @param forceRefresh To require content to be computed, breaking the cache of the API
+         * @param successCallback
+         * @param errorCallback
+         */
+        factory.getContent = function (socialMagazineId, dateRange, page, pageSize, forceRefresh, successCallback, errorCallback) {
+
+            var queryParams = {
+                page: page,
+                pagesize: pageSize
+            };
+
+            var dateRangeInt = parseInt(dateRange);
+            if (dateRangeInt > 0) {
+                queryParams.from = "d" + dateRangeInt;
+            }
+
+            // If requested add a cache breaker parameter with a random value
+            if (forceRefresh === true) {
+                queryParams.cb = new Date().getTime() * (Math.random() + 1);
+            }
+
+            factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/content", queryParams).then(
+                successCallback,
+                errorCallback
+            );
+        };
+
+        // gives the ability to cancel all ongoing getContent queries
+        // used when changing filter / date while staying in the same page
+        factory.getContentDeferred = $q.defer();
+        factory.abortGetContent = function () {
+            factory.getContentDeferred.resolve();
+            factory.getContentDeferred = $q.defer();
+        };
+
+		/**
+         * Fetches expanded content for url
+         * @param url
+         * @returns {*}
+         */
+        factory.getArticleForUrl = function (url) {
+            var queryParams = {url: url};
+            return factory.restangularAPI.withHttpConfig({timeout: factory.getArticleForUrlDeferred.promise}).customGET("articleforurl", queryParams);
+        };
+
+        // gives the ability to cancel all ongoing getArticleForUrl queries
+        // used when changing filter / date while staying in the same content page
+        factory.getArticleForUrlDeferred = $q.defer();
+        factory.abortGetArticleForUrl = function () {
+            factory.getArticleForUrlDeferred.resolve();
+            factory.getArticleForUrlDeferred = $q.defer();
+        };
+
+        return factory;
+    }]);
+
+
+}(angular.module("angularHorizonsPublicView.faveeoApi")));
+
+(function (faveeoApi) {
+
+
+	faveeoApi.factory('FaveeoApiSpecificContent', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
+		var factory = {};
+		factory.path = "twitterinfluencers2/";
+		factory.restangularAPI = Restangular.all(factory.path);
+
+		/**
+		 * Get influencers content
+		 * @param socialMagazineId
+		 * @param dayStart Number of days to skip before getting content
+		 * @param dayRange Number of days to get content for
+		 * @param page
+		 * @param pageSize
+		 * @param forceRefresh To require content to be computed, breaking the cache of the API
+		 * @param successCallback
+		 * @param errorCallback
+		 */
+		factory.getContent = function (socialMagazineId, dayStart, dayRange, page, pageSize, extraParameters, forceRefresh, successCallback, errorCallback) {
+
+			var queryParams = {
+				page: page,
+				pagesize: pageSize
+			};
+
+			var dayStartInt = parseInt(dayStart);
+			if (dayStartInt > 0) {
+				queryParams.to = "d" + dayStartInt;
+			}
+			var dayRangeInt = parseInt(dayRange);
+			if (dayRangeInt > 0) {
+				queryParams.from = "d" + (dayRangeInt + dayStartInt);
+			}
+
+			angular.forEach(extraParameters, function (value, key) {
+				queryParams[key] = value;
+			});
+
+			// If requested add a cache breaker parameter with a random value
+			if (forceRefresh === true) {
+				queryParams.cb = new Date().getTime() * (Math.random() + 1);
+			}
+
+			factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/content", queryParams).then(
+				function (data) {
+					successCallback(data.content);
+				},
+				HttpErrorHandler.useDefaultCallbackIfUndefined(errorCallback)
+			);
+		};
+
+		// gives the ability to cancel all ongoing getContent queries
+		// used when changing filter / date while staying in the same page
+		factory.getContentDeferred = $q.defer();
+		factory.abortGetContent = function () {
+			factory.getContentDeferred.resolve();
+			factory.getContentDeferred = $q.defer();
+		};
+
+		return factory;
+	}]);
+
+
+}(angular.module("angularHorizonsPublicView.faveeoApi")));
+
+(function (app) {
+    app.factory('HttpErrorEvents', function () {
+        var factory = {};
+        factory.HTTP_ERROR_4XX = 'HTTP_ERROR_4XX';
+        factory.HTTP_ERROR_5XX = 'HTTP_ERROR_5XX';
+        factory.HTTP_OTHER_ERROR = 'HTTP_OTHER_ERROR';
+        factory.HTTP_ERROR = 'HTTP_ERROR';
+        return factory;
+    });
+}(angular.module("angularHorizonsPublicView.factories")));
+
+(function (app) {
+    'use strict';
+    app.factory('HttpErrorHandler', function ($rootScope, HttpErrorEvents) {
+        var factory = {};
+
+        /**
+         * If the callBackFunc is undefined, returns defaultErrorCallback
+         * @param callBackFunc
+         */
+        factory.useDefaultCallbackIfUndefined = function (callBackFunc) {
+            return angular.isFunction(callBackFunc) ? callBackFunc : factory.defaultErrorCallback;
+        };
+
+        /**
+         * Default http error handler.
+         * Handle the http errors by broadcasting specific events
+         * related to the HTTP errors
+         *
+         * @param response
+         */
+        factory.defaultErrorCallback = function (response) {
+            // broadcast a generic error event
+            $rootScope.$broadcast(HttpErrorEvents.HTTP_ERROR, "Sorry, an unexpected error happened (" + response.status + "). Please report the issue or try again later.");
+
+            // broadcast specific error events
+            switch (response.status) {
+            case 404:
+            case 408:
+                $rootScope.$broadcast(HttpErrorEvents.HTTP_ERROR_4XX, "Sorry, the server could not be reached. Please check your connection and try again");
+                break;
+            case 500:
+            case 501:
+            case 502:
+            case 503:
+            case 504:
+            case 505:
+                $rootScope.$broadcast(HttpErrorEvents.HTTP_ERROR_5XX, "Sorry, our servers are experiencing some troubles. Our team is working on it. Please try again later.");
+                break;
+            default:
+                $rootScope.$broadcast(HttpErrorEvents.HTTP_OTHER_ERROR, "Sorry, an unexpected error happened (" + response.status + "). Please report the issue or try again later.");
+                break;
+            }
+        };
+
+        return factory;
+    });
+}(angular.module("angularHorizonsPublicView.factories")));
+
 (function (app) {
     app.filter('default', function () {
         return function (value, defaultValue) {
@@ -195,238 +431,6 @@ angular.module('angularHorizonsPublicView.directives').directive('fallbackTwitte
     });
 
 }(angular.module("angularHorizonsPublicView.filters")));
-(function (faveeoApi) {
-
-
-    faveeoApi.factory('FaveeoApiInfluencers', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
-        var factory = {};
-        factory.path = "twitterinfluencers2/";
-        factory.restangularAPI = Restangular.all(factory.path);
-
-        factory.getExamples = function (socialMagazineId, successCallback, errorCallback) {
-            factory.restangularAPI.one(socialMagazineId + "/examples").getList().then(
-                successCallback,
-                HttpErrorHandler.useDefaultCallbackIfUndefined(errorCallback)
-            );
-        };
-
-        factory.getInfluencers = function (socialMagazineId, successCallback, errorCallback) {
-            factory.restangularAPI.one(socialMagazineId + "/influencers").getList().then(
-                successCallback,
-                HttpErrorHandler.useDefaultCallbackIfUndefined(errorCallback)
-            );
-        };
-
-        return factory;
-    }]);
-
-
-}(angular.module("angularHorizonsPublicView.faveeoApi")));
-
-(function (faveeoApi) {
-
-    faveeoApi.factory('FaveeoApiConfig', function (Restangular) {
-		var factory = {};
-		factory.init = function(serverUrl) {
-			Restangular.setDefaultHeaders({
-				'Content-Type': 'application/json'
-			});
-			Restangular.setBaseUrl(serverUrl);
-		};
-		return factory;
-    });
-
-    faveeoApi.factory('FaveeoApiHorizonsContent', ['$q', 'Restangular', function ($q, Restangular) {
-        var factory = {};
-        factory.path = "twitterinfluencers2/";
-        factory.restangularAPI = Restangular.all(factory.path);
-
-        /**
-         * Get influencers content
-         * @param socialMagazineId
-         * @param dateRange
-         * @param page
-         * @param pageSize
-         * @param forceRefresh To require content to be computed, breaking the cache of the API
-         * @param successCallback
-         * @param errorCallback
-         */
-        factory.getContent = function (socialMagazineId, dateRange, page, pageSize, forceRefresh, successCallback, errorCallback) {
-
-            var queryParams = {
-                page: page,
-                pagesize: pageSize
-            };
-
-            var dateRangeInt = parseInt(dateRange);
-            if (dateRangeInt > 0) {
-                queryParams.from = "d" + dateRangeInt;
-            }
-
-            // If requested add a cache breaker parameter with a random value
-            if (forceRefresh === true) {
-                queryParams.cb = new Date().getTime() * (Math.random() + 1);
-            }
-
-            factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/content", queryParams).then(
-                successCallback,
-                errorCallback
-            );
-        };
-
-        // gives the ability to cancel all ongoing getContent queries
-        // used when changing filter / date while staying in the same page
-        factory.getContentDeferred = $q.defer();
-        factory.abortGetContent = function () {
-            factory.getContentDeferred.resolve();
-            factory.getContentDeferred = $q.defer();
-        };
-
-		/**
-         * Fetches expanded content for url
-         * @param url
-         * @returns {*}
-         */
-        factory.getArticleForUrl = function (url) {
-            var queryParams = {url: url};
-            return factory.restangularAPI.withHttpConfig({timeout: factory.getArticleForUrlDeferred.promise}).customGET("articleforurl", queryParams);
-        };
-
-        // gives the ability to cancel all ongoing getArticleForUrl queries
-        // used when changing filter / date while staying in the same content page
-        factory.getArticleForUrlDeferred = $q.defer();
-        factory.abortGetArticleForUrl = function () {
-            factory.getArticleForUrlDeferred.resolve();
-            factory.getArticleForUrlDeferred = $q.defer();
-        };
-
-        return factory;
-    }]);
-
-
-}(angular.module("angularHorizonsPublicView.faveeoApi")));
-
-(function (faveeoApi) {
-
-
-	faveeoApi.factory('FaveeoApiSpecificContent', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
-		var factory = {};
-		factory.path = "twitterinfluencers2/";
-		factory.restangularAPI = Restangular.all(factory.path);
-
-		/**
-		 * Get influencers content
-		 * @param socialMagazineId
-		 * @param dayStart Number of days to skip before getting content
-		 * @param dayRange Number of days to get content for
-		 * @param page
-		 * @param pageSize
-		 * @param forceRefresh To require content to be computed, breaking the cache of the API
-		 * @param successCallback
-		 * @param errorCallback
-		 */
-		factory.getContent = function (socialMagazineId, dayStart, dayRange, page, pageSize, forceRefresh, successCallback, errorCallback) {
-
-			var queryParams = {
-				page: page,
-				pagesize: pageSize
-			};
-
-			var dayStartInt = parseInt(dayStart);
-			if (dayStartInt > 0) {
-				queryParams.to = "d" + dayStartInt;
-			}
-			var dayRangeInt = parseInt(dayRange);
-			if (dayRangeInt > 0) {
-				queryParams.from = "d" + (dayRangeInt + dayStartInt);
-			}
-
-			// If requested add a cache breaker parameter with a random value
-			if (forceRefresh === true) {
-				queryParams.cb = new Date().getTime() * (Math.random() + 1);
-			}
-
-			factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/content", queryParams).then(
-				function (data) {
-					successCallback(data.content);
-				},
-				HttpErrorHandler.useDefaultCallbackIfUndefined(errorCallback)
-			);
-		};
-
-		// gives the ability to cancel all ongoing getContent queries
-		// used when changing filter / date while staying in the same page
-		factory.getContentDeferred = $q.defer();
-		factory.abortGetContent = function () {
-			factory.getContentDeferred.resolve();
-			factory.getContentDeferred = $q.defer();
-		};
-
-		return factory;
-	}]);
-
-
-}(angular.module("angularHorizonsPublicView.faveeoApi")));
-
-(function (app) {
-    app.factory('HttpErrorEvents', function () {
-        var factory = {};
-        factory.HTTP_ERROR_4XX = 'HTTP_ERROR_4XX';
-        factory.HTTP_ERROR_5XX = 'HTTP_ERROR_5XX';
-        factory.HTTP_OTHER_ERROR = 'HTTP_OTHER_ERROR';
-        factory.HTTP_ERROR = 'HTTP_ERROR';
-        return factory;
-    });
-}(angular.module("angularHorizonsPublicView.factories")));
-
-(function (app) {
-    'use strict';
-    app.factory('HttpErrorHandler', function ($rootScope, HttpErrorEvents) {
-        var factory = {};
-
-        /**
-         * If the callBackFunc is undefined, returns defaultErrorCallback
-         * @param callBackFunc
-         */
-        factory.useDefaultCallbackIfUndefined = function (callBackFunc) {
-            return angular.isFunction(callBackFunc) ? callBackFunc : factory.defaultErrorCallback;
-        };
-
-        /**
-         * Default http error handler.
-         * Handle the http errors by broadcasting specific events
-         * related to the HTTP errors
-         *
-         * @param response
-         */
-        factory.defaultErrorCallback = function (response) {
-            // broadcast a generic error event
-            $rootScope.$broadcast(HttpErrorEvents.HTTP_ERROR, "Sorry, an unexpected error happened (" + response.status + "). Please report the issue or try again later.");
-
-            // broadcast specific error events
-            switch (response.status) {
-            case 404:
-            case 408:
-                $rootScope.$broadcast(HttpErrorEvents.HTTP_ERROR_4XX, "Sorry, the server could not be reached. Please check your connection and try again");
-                break;
-            case 500:
-            case 501:
-            case 502:
-            case 503:
-            case 504:
-            case 505:
-                $rootScope.$broadcast(HttpErrorEvents.HTTP_ERROR_5XX, "Sorry, our servers are experiencing some troubles. Our team is working on it. Please try again later.");
-                break;
-            default:
-                $rootScope.$broadcast(HttpErrorEvents.HTTP_OTHER_ERROR, "Sorry, an unexpected error happened (" + response.status + "). Please report the issue or try again later.");
-                break;
-            }
-        };
-
-        return factory;
-    });
-}(angular.module("angularHorizonsPublicView.factories")));
-
 angular.module('angularHorizonsPublicView.directives').directive('article', function () {
     return {
         restrict: 'E',

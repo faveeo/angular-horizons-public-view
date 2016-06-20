@@ -17,7 +17,7 @@
 		 * @param successCallback
 		 * @param errorCallback
 		 */
-		factory.getContent = function (socialMagazineId, dayStart, dayRange, page, pageSize, forceRefresh, successCallback, errorCallback) {
+		factory.getContent = function (socialMagazineId, dayStart, dayRange, page, pageSize, extraParameters, forceRefresh, successCallback, errorCallback) {
 
 			var queryParams = {
 				page: page,
@@ -32,6 +32,10 @@
 			if (dayRangeInt > 0) {
 				queryParams.from = "d" + (dayRangeInt + dayStartInt);
 			}
+
+			angular.forEach(extraParameters, function (value, key) {
+				queryParams[key] = value;
+			});
 
 			// If requested add a cache breaker parameter with a random value
 			if (forceRefresh === true) {
