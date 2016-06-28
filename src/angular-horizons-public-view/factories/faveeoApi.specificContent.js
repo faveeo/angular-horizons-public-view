@@ -3,7 +3,7 @@
 
 	faveeoApi.factory('FaveeoApiSpecificContent', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
 		var factory = {};
-		factory.path = "twitterinfluencers2/";
+		factory.path = "horizons/v1/";
 		factory.restangularAPI = Restangular.all(factory.path);
 
 		/**
@@ -42,7 +42,7 @@
 				queryParams.cb = new Date().getTime() * (Math.random() + 1);
 			}
 
-			factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/content", queryParams).then(
+			factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/public/content", queryParams).then(
 				function (data) {
 					successCallback(data.content);
 				},

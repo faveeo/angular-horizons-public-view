@@ -158,7 +158,7 @@ angular.module('angularHorizonsPublicView.directives').directive('fallbackTwitte
 
 	faveeoApi.factory('FaveeoApiSpecificContent', ['$q', 'Restangular', 'HttpErrorHandler', function ($q, Restangular, HttpErrorHandler) {
 		var factory = {};
-		factory.path = "twitterinfluencers2/";
+		factory.path = "horizons/v1/";
 		factory.restangularAPI = Restangular.all(factory.path);
 
 		/**
@@ -197,7 +197,7 @@ angular.module('angularHorizonsPublicView.directives').directive('fallbackTwitte
 				queryParams.cb = new Date().getTime() * (Math.random() + 1);
 			}
 
-			factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/content", queryParams).then(
+			factory.restangularAPI.withHttpConfig({timeout: factory.getContentDeferred.promise}).customGET(socialMagazineId + "/public/content", queryParams).then(
 				function (data) {
 					successCallback(data.content);
 				},
@@ -525,50 +525,6 @@ angular.module('angularHorizonsPublicView.directives').directive('classicarticle
 });
 
 
-angular.module('angularHorizonsPublicView.directives').directive('httperrorwarning', function () {
-    'use strict';
-    return {
-        restrict: 'E',
-        scope: {
-            only_global_error: '='
-        },
-        templateUrl: "angular-horizons-public-view/directives/httpErrorWarning/httperrorwarning.tpl.html",
-        replace: true,
-        controller: ['$scope', 'HttpErrorEvents', function ($scope, HttpErrorEvents) {
-            $scope.hideErrors = function () {
-                $scope.isError = false;
-                $scope.errorValue = "";
-            };
-
-            var onlyGlobalError = $scope.only_global_error || false;
-
-            // listen to the global error or the detailed ones
-            if (onlyGlobalError) {
-                $scope.$on(HttpErrorEvents.HTTP_ERROR, function () {
-                    $scope.isError = true;
-                    $scope.errorValue = "HTTP_ERRORS.ALL";
-                });
-            } else {
-                $scope.$on(HttpErrorEvents.HTTP_ERROR_4XX, function () {
-                    $scope.isError = true;
-                    $scope.errorValue = "HTTP_ERRORS.4XX";
-                });
-                $scope.$on(HttpErrorEvents.HTTP_ERROR_5XX, function () {
-                    $scope.isError = true;
-                    $scope.errorValue = "HTTP_ERRORS.5XX";
-                });
-                $scope.$on(HttpErrorEvents.HTTP_OTHER_ERROR, function () {
-                    $scope.isError = true;
-                    $scope.errorValue = "HTTP_ERRORS.OTHER";
-                });
-            }
-
-            $scope.hideErrors();
-        }]
-    };
-});
-
-
 (function (app) {
         app.directive('simpleview',
             function () {
@@ -650,6 +606,50 @@ angular.module('angularHorizonsPublicView.directives').directive('httperrorwarni
 
     }(angular.module("angularHorizonsPublicView.simpleView"))
 );
+
+angular.module('angularHorizonsPublicView.directives').directive('httperrorwarning', function () {
+    'use strict';
+    return {
+        restrict: 'E',
+        scope: {
+            only_global_error: '='
+        },
+        templateUrl: "angular-horizons-public-view/directives/httpErrorWarning/httperrorwarning.tpl.html",
+        replace: true,
+        controller: ['$scope', 'HttpErrorEvents', function ($scope, HttpErrorEvents) {
+            $scope.hideErrors = function () {
+                $scope.isError = false;
+                $scope.errorValue = "";
+            };
+
+            var onlyGlobalError = $scope.only_global_error || false;
+
+            // listen to the global error or the detailed ones
+            if (onlyGlobalError) {
+                $scope.$on(HttpErrorEvents.HTTP_ERROR, function () {
+                    $scope.isError = true;
+                    $scope.errorValue = "HTTP_ERRORS.ALL";
+                });
+            } else {
+                $scope.$on(HttpErrorEvents.HTTP_ERROR_4XX, function () {
+                    $scope.isError = true;
+                    $scope.errorValue = "HTTP_ERRORS.4XX";
+                });
+                $scope.$on(HttpErrorEvents.HTTP_ERROR_5XX, function () {
+                    $scope.isError = true;
+                    $scope.errorValue = "HTTP_ERRORS.5XX";
+                });
+                $scope.$on(HttpErrorEvents.HTTP_OTHER_ERROR, function () {
+                    $scope.isError = true;
+                    $scope.errorValue = "HTTP_ERRORS.OTHER";
+                });
+            }
+
+            $scope.hideErrors();
+        }]
+    };
+});
+
 
 angular.module("angularHorizonsPublicView").run(["$templateCache", function($templateCache) {$templateCache.put("angular-horizons-public-view/directives/article/article.tpl.html","<div>\n  <classicarticle ng-if=\"article.document\" entry=\"article.document\" showimages=\"showimages\" trefs=\"article.twitterReferences\" highlights=\"article.highlights\" shareassetspath=\"{{assetspath}}\"></classicarticle>\n</div>\n");
 $templateCache.put("angular-horizons-public-view/directives/classicArticle/classicArticle.tpl.html","<div class=\"article\" ng-mouseover=\"isHover = true\" ng-mouseleave=\"showShareButtons = false; isHover = false\">\n    <div ng-show=\"hasArticle()\">\n        <h6 class=\"mg-md clearfix\" ng-dblclick=\"showHighlight=!showHighlight\" ng-show=\"entry.pubdate\">\n            <span class=\"float-left\">{{entry.pubdate | timeSince}} ago</span>\n        </h6>\n\n        <div class=\"boxmask\" ng-if=\"showimages\">\n            <a href=\"{{entry.url}}\" target=\"_blank\">\n                <img ng-src=\"{{entry.imageurl}}\"\n                     class=\"img-responsive\" article-image>\n            </a>\n        </div>\n        <div>\n            <h5 class=\"mg-md\">\n                <a href=\"{{entry.url}}\" target=\"_blank\"\n                   >\n                    {{entry.title | default:\'Click here to view article\'}}\n                </a>\n            </h5>\n\n            <p class=\"summary\">\n                <a href=\"{{entry.url}}\" target=\"_blank\"\n                   ng-bind-html=\"entry.automaticsummary | cut:true:535:\' ...\' | nl2br\">\n                </a>\n            </p>\n            <dl class=\"highlights\" ng-repeat=\"hlt in highlights\" ng-if=\"showHighlight\">\n                <dt>In {{hlt.field}}:</dt>\n                <dd ng-repeat=\"fragment in hlt.fragments\" ng-bind-html=\"fragment|to_trusted_html\"></dd>\n            </dl>\n            <h6 class=\"mg-md\" ng-if=\"entry.urlFQDN\">\n                <a href=\"{{entry.url}}\" target=\"_blank\">\n                    {{entry.urlFQDN | cleanHostName}}\n                </a>\n            </h6>\n        </div>\n    </diV>\n    <span class=\"twitter-img\" ng-repeat=\"tr in trefs\">\n        <a href=\"{{tr.tweetURL}}\" target=\"_blank\">\n            <img class=\"img-thumbnail twitteruser-img\" ng-src=\"{{tr.authorImageURL}}\"\n                 alt=\"{{tr.authorName}}\" fallback-twitter-src-img=\"{{tr.authorName}}\"/>\n        </a>\n    </span>\n    <hr>\n    <div class=\"share-container text-center\" ng-show=\"hasArticle()\">\n        <div class=\"action-buttons text-center\">\n            <a href=\"\" ng-click=\"showShareButtons = true\" ng-show=\"isHover\">\n                <i class=\"fa fa-share-alt\"></i> Share Article\n            </a>\n        </div>\n        <!-- AddThis Button BEGIN -->\n        <div data-addthis-toolbox data-url=\"{{entry.url}}\" data-title=\"{{entry.title}}\"\n             data-description=\"{{entry.automaticsummary}}\"\n             class=\"addthis_toolbox addthis_default_style {{addThisClass}}\" ng-show=\"showShareButtons\">\n            <a class=\"addthis_button_twitter\"><img ng-src=\"{{assetspath+\'/shareIcons/twitter.png\'}}\"></a>\n            <a class=\"addthis_button_facebook\"><img ng-src=\"{{assetspath+\'/shareIcons/facebook.png\'}}\"></a>\n            <a class=\"addthis_button_linkedin\"><img ng-src=\"{{assetspath+\'/shareIcons/linkedin.png\'}}\"></a>\n            <a class=\"addthis_button_google_plusone_share\"><img ng-src=\"{{assetspath+\'/shareIcons/googleplus.png\'}}\"></a>\n            <a class=\"addthis_button_evernote\"><img ng-src=\"{{assetspath+\'/shareIcons/evernote.png\'}}\"></a>\n            <a class=\"addthis_button_mailto\"><img ng-src=\"{{assetspath+\'/shareIcons/mail.png\'}}\"></a>\n            <a class=\"addthis_button_pocket\"><img ng-src=\"{{assetspath+\'/shareIcons/pocket.png\'}}\"></a>\n            <a class=\"addthis_button_buffer\"><img ng-src=\"{{assetspath+\'/shareIcons/buffer.png\'}}\"></a>\n        </div>\n    </div>\n</div>\n");
