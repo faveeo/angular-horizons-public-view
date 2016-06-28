@@ -53,6 +53,16 @@
         };
     });
 
+    app.filter('cleanDomainName', function () {
+        return function (source) {
+            source = source.replace(/^https?:\/\//, '');
+            if (source.substr(-1) == '/') {
+                source = source.substr(0, source.length - 1);
+            }
+            return (source.split('/')[0]);
+        };
+    });
+
     app.filter('timeSince', function (iso8601) {
 
         return function (date) {
