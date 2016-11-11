@@ -21,17 +21,23 @@
                             $scope.newPage = function () {
                                 $scope.articles = [];
                                 $scope.page = 1;
+
+                                // if the page contains several simpleview directives
+                                // we do not abort previous queries
+                                if (angular.isUndefined($scope.config.multiContentPage) || !$scope.config.multiContentPage) {
+                                    FaveeoApiHorizonsContent.abortGetArticleForUrl();
+                                    FaveeoApiHorizonsContent.abortGetContent();
+                                }
+
                                 $scope.getContent();
                             };
 
                             $scope.setNewDateRange = function(dateRange) {
                                 $scope.dateRange = dateRange;
-                                $scope.init();
+                                $scope.newPage();
                             };
 
                             $scope.getContent = function () {
-                                FaveeoApiHorizonsContent.abortGetArticleForUrl();
-                                FaveeoApiHorizonsContent.abortGetContent();
                                 $scope.loading = true;
                                 FaveeoApiHorizonsContent.getContent($scope.socialMagazineId, $scope.dateRange, $scope.page, $scope.pageSize, false,
                                     function (data) {
